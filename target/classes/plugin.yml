@@ -1,0 +1,6 @@
+name: SiegePlugin
+version: '1.4.0.0'
+main: amedouhu.siegeplugin.SiegePlugin
+api-version: 1.19
+commands:
+  siege:

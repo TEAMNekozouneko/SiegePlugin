@@ -1,0 +1,6 @@
+amedouhu\siegeplugin\events\PlayerRespawnEvent.class
+amedouhu\siegeplugin\commands\Siege.class
+amedouhu\siegeplugin\events\PlayerDeathEvent.class
+amedouhu\siegeplugin\SiegePlugin.class
+amedouhu\siegeplugin\events\PlayerJoinEvent.class
+amedouhu\siegeplugin\apis\SendMessage.class

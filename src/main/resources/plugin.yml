@@ -1,0 +1,6 @@
+name: SiegePlugin
+version: '${project.version}'
+main: amedouhu.siegeplugin.SiegePlugin
+api-version: 1.19
+commands:
+  siege:
