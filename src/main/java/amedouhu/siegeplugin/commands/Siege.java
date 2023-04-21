@@ -14,10 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Siege implements CommandExecutor, TabCompleter {
     // 「siege」コマンドの処理クラス
@@ -58,6 +55,8 @@ public class Siege implements CommandExecutor, TabCompleter {
                                 if (i == players.size() / 2 - 1) {
                                     // 赤色の大将に分類する
                                     sendMessage.sendPlayer(player,"あなたは" + ChatColor.RED + " 赤 " + ChatColor.WHITE + "チームの大将です。");
+                                    ItemStack itemStack = new ItemStack(Material.DIAMOND_HELMET);
+                                    player.getInventory().setItem(39,itemStack);
                                     player.setPlayerListName(ChatColor.RED + "赤大将 " + player.getName());
                                     player.addScoreboardTag("RED");
                                 }else {
@@ -77,6 +76,8 @@ public class Siege implements CommandExecutor, TabCompleter {
                                 if (i == players.size() - 1) {
                                     // 青色の大将に分類する
                                     sendMessage.sendPlayer(player,"あなたは" + ChatColor.BLUE + " 青 " + ChatColor.WHITE + "チームの大将です。");
+                                    ItemStack itemStack = new ItemStack(Material.DIAMOND_HELMET);
+                                    player.getInventory().setItem(39,itemStack);
                                     player.setPlayerListName(ChatColor.BLUE + "青大将 " + player.getName());
                                     player.addScoreboardTag("BLUE");
                                 }else {
@@ -115,12 +116,20 @@ public class Siege implements CommandExecutor, TabCompleter {
                         if (target != null) {
                             // 対象のプレイヤーを取得できているなら
                             Inventory inventory = target.getInventory();
-                            for (Player player : Bukkit.getOnlinePlayers()) {
-                                if (player.getScoreboardTags().contains("siege")) {
-                                    // ループ中のプレイヤーがSiegeのプレイヤーなら
-                                    player.getInventory().setContents(inventory.getContents());
+                            // config.ymlを初期化する
+                            config.set("inventory",null);
+                            // config.ymlを上書きする
+                            for (int i=0;i<43;i++) {
+                                // スロットにアイテムを設置する
+                                if (inventory.getItem(i) != null) {
+                                    // ループ中のスロットにアイテムが設定されているなら
+                                    ItemStack itemStack = inventory.getItem(i);
+                                    Map<String, Object> itemMap = Objects.requireNonNull(itemStack).serialize();
+                                    config.createSection("inventory." + i,itemMap);
+                                    SiegePlugin.getPlugin().saveConfig();
                                 }
                             }
+                            SiegePlugin.getPlugin().saveConfig();
                             // 実行メッセージを送信する
                             sendMessage.sendSender(sender,"処理は正常に実行されました。");
                         }else {
@@ -143,7 +152,6 @@ public class Siege implements CommandExecutor, TabCompleter {
                                 // ゲームモードを設定する
                                 player.setGameMode(GameMode.SURVIVAL);
                                 if (player.getScoreboardTags().contains("red") || player.getScoreboardTags().contains("RED")) {
-                                    // 死亡したプレイヤーが赤チームの兵役なら
                                     String locationString = config.getString("red");
                                     String[] locParts = Objects.requireNonNull(locationString).split(","); // カンマで区切る
                                     Location location= new Location(Bukkit.getWorld(locParts[0]), Double.parseDouble(locParts[1]), Double.parseDouble(locParts[2]), Double.parseDouble(locParts[3]), Float.parseFloat(locParts[4]), Float.parseFloat(locParts[5])); // Location型の変数を宣言
@@ -153,6 +161,18 @@ public class Siege implements CommandExecutor, TabCompleter {
                                     String[] locParts = Objects.requireNonNull(locationString).split(","); // カンマで区切る
                                     Location location= new Location(Bukkit.getWorld(locParts[0]), Double.parseDouble(locParts[1]), Double.parseDouble(locParts[2]), Double.parseDouble(locParts[3]), Float.parseFloat(locParts[4]), Float.parseFloat(locParts[5])); // Location型の変数を宣言
                                     player.teleport(location);
+                                }
+                                // インベントリを設定する
+                                Inventory inventory = player.getInventory();
+                                inventory.clear();
+                                for (int i=0;i<43;i++) {
+                                    // スロットにアイテムを設置する
+                                    if (config.get("inventory." + i) != null) {
+                                        // ループ中のスロットにアイテムが設定されているなら
+                                        Map<String, Object> itemMap = config.getConfigurationSection("inventory." + i).getValues(true);
+                                        ItemStack itemStack = ItemStack.deserialize(itemMap);
+                                        inventory.setItem(i,itemStack);
+                                    }
                                 }
                             }
                         }
